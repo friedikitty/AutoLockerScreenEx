@@ -66,6 +66,13 @@ public partial class MainWindow : Window
         Show();
         WindowState = WindowState.Normal;
         Activate();
+        DoCheck();
+    }
+
+    protected override void OnContentRendered(EventArgs e)
+    {
+        base.OnContentRendered(e);
+        DoCheck(); // first show
     }
 
     protected override void OnClosing(CancelEventArgs e)
@@ -82,7 +89,9 @@ public partial class MainWindow : Window
         base.OnClosing(e);
     }
 
-    private void Check_Click(object sender, RoutedEventArgs e)
+    private void Check_Click(object sender, RoutedEventArgs e) => DoCheck();
+
+    private void DoCheck()
     {
         try
         {
