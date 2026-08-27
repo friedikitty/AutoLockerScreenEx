@@ -62,7 +62,17 @@ public static class ScreenOffTimeout
         return JsonSerializer.Serialize(new { ac, dc });
     }
 
-    /// <summary>CLI entry: check_lock | set_lock &lt;ac_seconds&gt; [dc_seconds]. Returns exit code.</summary>
+    private const string Usage = """
+        AutoLockerScreenEx - check/set the Windows screen auto-lock (display off) timeout.
+
+        usage:
+          AutoLockerScreenEx.exe                              start the GUI
+          AutoLockerScreenEx.exe check_lock                   print timeout as JSON {"ac":..,"dc":..} (seconds, 0 = never)
+          AutoLockerScreenEx.exe set_lock <ac_sec> [dc_sec]   set timeout (dc defaults to ac), prints resulting JSON
+          AutoLockerScreenEx.exe -h | --help | /? | -?        show this help
+        """;
+
+    /// <summary>CLI entry: check_lock | set_lock &lt;ac_seconds&gt; [dc_seconds] | -h. Returns exit code.</summary>
     public static int RunCli(string[] args)
     {
         try
@@ -83,8 +93,15 @@ public static class ScreenOffTimeout
                     SetScreenOffTimeoutDC(dc);
                     Console.WriteLine(ToJson());
                     return 0;
+                case "-h":
+                case "--help":
+                case "-?":
+                case "/?":
+                case "help":
+                    Console.WriteLine(Usage);
+                    return 0;
                 default:
-                    Console.Error.WriteLine("usage: AutoLockerScreenEx [check_lock | set_lock <ac_seconds> [dc_seconds]]");
+                    Console.Error.WriteLine(Usage);
                     return 2;
             }
         }
