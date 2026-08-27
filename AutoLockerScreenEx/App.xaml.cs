@@ -3,7 +3,7 @@ using System.Windows;
 
 namespace AutoLockerScreenEx;
 
-public partial class App : Application
+public partial class App : System.Windows.Application
 {
     [DllImport("kernel32.dll")] private static extern bool FreeConsole();
 

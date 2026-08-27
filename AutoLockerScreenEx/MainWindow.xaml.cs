@@ -1,12 +1,50 @@
+using System.ComponentModel;
+using System.Drawing;
 using System.Windows;
+using WinForms = System.Windows.Forms;
 
 namespace AutoLockerScreenEx;
 
 public partial class MainWindow : Window
 {
+    private readonly WinForms.NotifyIcon _tray;
+    private bool _reallyExit;
+
     public MainWindow()
     {
         InitializeComponent();
+
+        _tray = new WinForms.NotifyIcon
+        {
+            Text = "Auto Locker Screen",
+            Icon = System.Drawing.Icon.ExtractAssociatedIcon(Environment.ProcessPath!),
+            Visible = true,
+        };
+        var menu = new WinForms.ContextMenuStrip();
+        menu.Items.Add("Open", null, (_, _) => ShowMain());
+        menu.Items.Add("Exit", null, (_, _) => { _reallyExit = true; Close(); });
+        _tray.ContextMenuStrip = menu;
+        _tray.DoubleClick += (_, _) => ShowMain();
+    }
+
+    private void ShowMain()
+    {
+        Show();
+        WindowState = WindowState.Normal;
+        Activate();
+    }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        if (!_reallyExit)
+        {
+            // Closing the window just sits to the tray; Exit menu does the real exit.
+            e.Cancel = true;
+            Hide();
+            return;
+        }
+        _tray.Dispose();
+        base.OnClosing(e);
     }
 
     private void Check_Click(object sender, RoutedEventArgs e)
