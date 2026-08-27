@@ -1,10 +1,11 @@
 <Window x:Class="AutoLockerScreenEx.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Auto Locker Screen" Width="400" Height="240"
+        Title="Auto Locker Screen" Width="400" Height="280"
         WindowStartupLocation="CenterScreen">
     <Grid Margin="12">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -34,7 +35,20 @@
             <TextBox x:Name="DcBox" Grid.Column="1" Width="80" Text="0"/>
         </Grid>
 
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="3" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <CheckBox x:Name="MonitorBox" Grid.Column="0" VerticalAlignment="Center"
+                      Content="Monitor every" Checked="Monitor_Changed" Unchecked="Monitor_Changed"/>
+            <TextBox x:Name="IntervalBox" Grid.Column="1" Width="50" Margin="6,0" Text="60"
+                     TextChanged="Monitor_Changed"/>
+            <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="sec; warn if lock is off"/>
+        </Grid>
+
+        <Grid Grid.Row="4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>

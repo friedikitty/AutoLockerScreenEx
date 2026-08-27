@@ -1,6 +1,6 @@
 using System.ComponentModel;
-using System.Drawing;
 using System.Windows;
+using System.Windows.Threading;
 using WinForms = System.Windows.Forms;
 
 namespace AutoLockerScreenEx;
@@ -8,6 +8,7 @@ namespace AutoLockerScreenEx;
 public partial class MainWindow : Window
 {
     private readonly WinForms.NotifyIcon _tray;
+    private readonly DispatcherTimer _monitorTimer = new();
     private bool _reallyExit;
 
     public MainWindow()
@@ -25,6 +26,39 @@ public partial class MainWindow : Window
         menu.Items.Add("Exit", null, (_, _) => { _reallyExit = true; Close(); });
         _tray.ContextMenuStrip = menu;
         _tray.DoubleClick += (_, _) => ShowMain();
+
+        _monitorTimer.Tick += Monitor_Tick;
+    }
+
+    private void Monitor_Changed(object sender, RoutedEventArgs e)
+    {
+        _monitorTimer.Stop();
+        if (MonitorBox.IsChecked == true
+            && uint.TryParse(IntervalBox.Text, out uint n) && n > 0)
+        {
+            _monitorTimer.Interval = TimeSpan.FromSeconds(n);
+            _monitorTimer.Start();
+        }
+    }
+
+    private void Monitor_Tick(object? sender, EventArgs e)
+    {
+        try
+        {
+            var (ac, dc) = ScreenOffTimeout.Get();
+            if (ac <= 1 || dc <= 1)
+            {
+                // ponytail: re-warns on every failed check while the lock stays off;
+                // add a "already warned" state flag if the repeat spam bothers you.
+                _tray.ShowBalloonTip(10000, "Screen auto-lock is OFF!",
+                    $"Screen-off timeout is AC={ac}s, DC={dc}s (0 = never). Set a real value!",
+                    WinForms.ToolTipIcon.Warning);
+            }
+        }
+        catch
+        {
+            // transient read failure; try again next tick
+        }
     }
 
     private void ShowMain()
@@ -43,6 +77,7 @@ public partial class MainWindow : Window
             Hide();
             return;
         }
+        _monitorTimer.Stop();
         _tray.Dispose();
         base.OnClosing(e);
     }
