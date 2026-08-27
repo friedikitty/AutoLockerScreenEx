@@ -5,21 +5,19 @@ namespace AutoLockerScreenEx;
 
 public partial class App : Application
 {
-    [DllImport("kernel32.dll")] private static extern bool AttachConsole(uint dwProcessId);
-    private const uint AttachParentProcess = 0xFFFFFFFF;
+    [DllImport("kernel32.dll")] private static extern bool FreeConsole();
 
     protected override void OnStartup(StartupEventArgs e)
     {
         if (e.Args.Length > 0)
         {
-            // ponytail: WPF is a GUI-subsystem exe; attach to the parent console so
-            // check_lock/set_lock output is visible when run from cmd (cmd won't wait for us).
-            if (!Console.IsOutputRedirected)
-                AttachConsole(AttachParentProcess);
+            // Console-subsystem exe: cmd waits for us and shows our output.
             Environment.ExitCode = ScreenOffTimeout.RunCli(e.Args);
             Shutdown();
             return;
         }
+        // GUI mode: drop the console window so double-clicking doesn't leave one behind.
+        FreeConsole();
         base.OnStartup(e);
     }
 }
