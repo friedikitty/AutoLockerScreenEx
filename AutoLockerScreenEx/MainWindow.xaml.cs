@@ -7,6 +7,7 @@ namespace AutoLockerScreenEx;
 
 public partial class MainWindow : Window
 {
+    private readonly MainViewModel _vm = new();
     private readonly WinForms.NotifyIcon _tray;
     private readonly DispatcherTimer _monitorTimer = new();
     private bool _reallyExit;
@@ -14,6 +15,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        DataContext = _vm;
+        _vm.PropertyChanged += (_, _) => RestartMonitorTimer();
 
         _tray = new WinForms.NotifyIcon
         {
@@ -28,15 +31,15 @@ public partial class MainWindow : Window
         _tray.DoubleClick += (_, _) => ShowMain();
 
         _monitorTimer.Tick += Monitor_Tick;
+        RestartMonitorTimer();
     }
 
-    private void Monitor_Changed(object sender, RoutedEventArgs e)
+    private void RestartMonitorTimer()
     {
         _monitorTimer.Stop();
-        if (MonitorBox.IsChecked == true
-            && uint.TryParse(IntervalBox.Text, out uint n) && n > 0)
+        if (_vm.MonitorEnabled)
         {
-            _monitorTimer.Interval = TimeSpan.FromSeconds(n);
+            _monitorTimer.Interval = TimeSpan.FromSeconds(_vm.MonitorIntervalSeconds);
             _monitorTimer.Start();
         }
     }

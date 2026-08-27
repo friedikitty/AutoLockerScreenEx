@@ -42,9 +42,9 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <CheckBox x:Name="MonitorBox" Grid.Column="0" VerticalAlignment="Center"
-                      Content="Monitor every" Checked="Monitor_Changed" Unchecked="Monitor_Changed"/>
-            <TextBox x:Name="IntervalBox" Grid.Column="1" Width="50" Margin="6,0" Text="60"
-                     TextChanged="Monitor_Changed"/>
+                      Content="Monitor every" IsChecked="{Binding MonitorEnabled}"/>
+            <TextBox x:Name="IntervalBox" Grid.Column="1" Width="50" Margin="6,0"
+                     Text="{Binding MonitorIntervalText, UpdateSourceTrigger=PropertyChanged}"/>
             <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="sec; warn if lock is off"/>
         </Grid>
 
