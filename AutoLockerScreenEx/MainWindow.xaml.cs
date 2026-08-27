@@ -48,17 +48,32 @@ public partial class MainWindow : Window
             var (ac, dc) = ScreenOffTimeout.Get();
             if (ac <= 1 || dc <= 1)
             {
-                // ponytail: re-warns on every failed check while the lock stays off;
-                // add a "already warned" state flag if the repeat spam bothers you.
-                _tray.ShowBalloonTip(10000, "Screen auto-lock is OFF!",
-                    $"Screen-off timeout is AC={ac}s, DC={dc}s (0 = never). Set a real value!",
-                    WinForms.ToolTipIcon.Warning);
+                ShowWarning($"Screen-off timeout is AC={ac}s, DC={dc}s (0 = never). Set a real value!");
+            }
+            else
+            {
+                _warning?.Close(); // fixed -> auto-close the warning
             }
         }
         catch
         {
             // transient read failure; try again next tick
         }
+    }
+
+    private NotificationWindow? _warning;
+
+    private void ShowWarning(string message)
+    {
+        if (_warning != null)
+        {
+            _warning.UpdateMessage(message);
+            _warning.Activate();
+            return;
+        }
+        _warning = new NotificationWindow(message, ShowMain);
+        _warning.Closed += (_, _) => _warning = null;
+        _warning.Show();
     }
 
     private void ShowMain()
