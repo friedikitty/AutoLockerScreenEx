@@ -45,7 +45,8 @@ git push --force-with-lease origin main
 | 操作 | 结果 |
 |------|------|
 | push 到 `main` 分支 | 只构建，验证代码能编译，产物存为 Artifacts（临时下载，90 天） |
-| push 一个 `v*` 开头的 tag（如 `v1.0.0`） | 构建 + **自动创建 GitHub Release**，zip 挂在 Release 页面供下载 |
+| push 一个版本号 tag（`v1.0.0` 或 `1.0.0` 都行） | 构建 + **自动创建 GitHub Release**，zip 挂在 Release 页面供下载 |
+| 在 GitHub 网页上点 "Draft a new release" 发布 | 同上：发布时 workflow 会自动把构建好的 zip 补充上传到这个 Release |
 | 在 GitHub 网页 Actions 页手动点 "Run workflow" | 同 push 到 main |
 
 ### 流程（workflow 做了什么）
@@ -69,15 +70,18 @@ checkout 代码
 # 1. 正常改代码、提交、推到 main（这会先触发一次构建验证）
 git add . && git commit -m "..." && git push
 
-# 2. 确认 Actions 页构建通过后，打 tag 并推送
+# 2. 确认 Actions 页构建通过后，打 tag 并推送（v1.0.0 或 1.0.0 都可以）
 git tag v1.0.0
 git push origin v1.0.0
 
 # 3. 等一两分钟，GitHub 仓库的 Releases 页面就会出现 v1.0.0，附 AutoLockerScreenEx.zip
 ```
 
+也可以完全在网页上操作：Releases → Draft a new release → 填一个新 tag → Publish。workflow 会在发布后被触发，自动把构建好的 zip 补充上去。
+
 ### 常见问题
 
+- **Release 里只有 "Source code (zip/tar.gz)"？** 那是 GitHub 自动给每个 Release 附带的源码打包，不是我们的构建产物。如果缺少 `AutoLockerScreenEx.zip`，说明 workflow 没跑：原因通常是 tag 名字不符合规则（必须是 `v1.0.0` 或 `1.0.0` 这样的形式），去 Actions 页确认对应那次运行是否成功。
 - **tag 打错了**：先删远端 tag（`git push origin :v1.0.0`）和 GitHub 上对应的 Release，再删本地 tag（`git tag -d v1.0.0`），改正后重新打。
 - **想看某次构建的细节**：GitHub 仓库页 → Actions 标签 → 点对应的那次运行。
 - **不需要 Release，只想验证能不能编译**：直接 push 到 main 即可，不要打 tag。
