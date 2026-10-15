@@ -52,8 +52,14 @@ public partial class MainWindow : Window
             if (_vm.AutoResetEnabled)
             {
                 uint reset = _vm.AutoResetSeconds;
-                if (ac == 0) { ScreenOffTimeout.SetScreenOffTimeoutAC(reset); ac = reset; }
-                if (dc == 0) { ScreenOffTimeout.SetScreenOffTimeoutDC(reset); dc = reset; }
+                bool resetAc = ac == 0, resetDc = dc == 0;
+                if (resetAc) { ScreenOffTimeout.SetScreenOffTimeoutAC(reset); ac = reset; }
+                if (resetDc) { ScreenOffTimeout.SetScreenOffTimeoutDC(reset); dc = reset; }
+                if (resetAc || resetDc)
+                {
+                    string which = resetAc && resetDc ? "AC and DC" : resetAc ? "AC" : "DC";
+                    ShowResetNotice($"Screen-off timeout for {which} was 0 (never); auto-reset to {reset}s.");
+                }
             }
             if (ac <= 1 || dc <= 1)
             {
@@ -71,6 +77,20 @@ public partial class MainWindow : Window
     }
 
     private NotificationWindow? _warning;
+    private NotificationWindow? _resetNotice;
+
+    private void ShowResetNotice(string message)
+    {
+        if (_resetNotice != null)
+        {
+            _resetNotice.UpdateMessage(message);
+            _resetNotice.Activate();
+            return;
+        }
+        _resetNotice = new NotificationWindow(message, ShowMain, "SCREEN AUTO-LOCK AUTO-RESET", autoCloseSeconds: 5);
+        _resetNotice.Closed += (_, _) => _resetNotice = null;
+        _resetNotice.Show();
+    }
 
     private void ShowWarning(string message)
     {
