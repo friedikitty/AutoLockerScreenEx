@@ -3,6 +3,8 @@
 WPF tool to check/set the Windows screen auto-lock (display off) timeout via powrprof.
 Runs as a GUI with a tray icon, or as a CLI (`check_lock` / `set_lock`, see `-h`).
 
+![main window](README.assets/main-window.png)
+
 ## Features
 
 - **Check / Set**: read or set the AC (plugged in) and DC (on battery) screen-off
