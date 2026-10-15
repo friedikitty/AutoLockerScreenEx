@@ -17,6 +17,18 @@ Runs as a GUI with a tray icon, or as a CLI (`check_lock` / `set_lock`, see `-h`
 
 Settings persist to `~/.config/auto_locker_screen_ex/config.json`.
 
+## CI/CD
+
+GitHub Actions (`.github/workflows/build.yml`) builds every push to `main` as a
+compile check. To publish a release:
+
+- **CLI**: `git tag v1.0.0 && git push origin v1.0.0` (bare `1.0.0` also works) —
+  the workflow builds and creates the GitHub Release with `AutoLockerScreenEx.zip`.
+- **Web**: Releases → Draft a new release → Publish — the workflow then attaches
+  the built zip to it automatically.
+
+See `CI-CD.md` (中文) for the full pipeline documentation.
+
 ## Rule
 
 - Build via `build.ps1`, test via `test.ps1`. Both prompt for Debug/Release in the

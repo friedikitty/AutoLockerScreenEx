@@ -57,12 +57,69 @@ checkout 代码
   → dotnet publish -c Release（发布到 publish/ 目录）
   → 删除 pdb 调试文件，压缩成 AutoLockerScreenEx.zip
   → 上传 Artifacts
-  → （仅 v* tag 时）gh release create 创建 Release 并附上 zip
+  → （仅版本 tag / 网页发布时）创建 Release 并附上 zip；Release 已存在则改为上传附件
 ```
 
 - 运行在 GitHub 提供的 `windows-latest` 服务器上，免费（公开仓库），无需自己准备机器。
 - Release 用 runner 预装的 `gh` 命令创建，`--generate-notes` 会根据上次 Release 以来的提交自动生成更新说明。
 - `GITHUB_TOKEN` 是 GitHub 自动注入的密钥，不需要手动配置任何东西。
+
+### workflow 脚本全文（下次给别的项目照这个写）
+
+`.github/workflows/build.yml` 的完整内容：
+
+```yaml
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*', '[0-9]+.[0-9]+.[0-9]+']
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish
+        run: dotnet publish AutoLockerScreenEx/AutoLockerScreenEx.csproj -c Release -o publish
+
+      - name: Package
+        run: |
+          Remove-Item publish/*.pdb
+          Compress-Archive publish/* AutoLockerScreenEx.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AutoLockerScreenEx
+          path: AutoLockerScreenEx.zip
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create ${{ github.ref_name }} AutoLockerScreenEx.zip --title ${{ github.ref_name }} --generate-notes || gh release upload ${{ github.ref_name }} AutoLockerScreenEx.zip --clobber
+```
+
+照抄时按项目改 4 处：dotnet 版本、csproj 路径、zip 文件名、`tags` 规则。几个容易踩的坑（都是这次实际踩过的）：
+
+- **tag 规则要同时覆盖 `v*` 和纯数字 `[0-9]+.[0-9]+.[0-9]+`**：只写 `v*` 的话，打 `0.9.0` 这样的 tag 不会触发发布。
+- **必须加 `release: types: [published]`**：在 GitHub 网页上点按钮创建的 tag 不产生 push 事件，只靠 `on: push: tags` 永远不会跑；加了 release 事件后网页发布也能触发。
+- **发布步骤用 `create ... || upload --clobber`**：tag 推送时 Release 还不存在，走 `create`；网页发布时 Release 已存在，`create` 会失败，降级为 `upload --clobber` 把 zip 补上去。两条路共用一个步骤。
+- **`permissions: contents: write` 不能少**，否则 `gh release` 没有写权限。
+- **tag 触发时用的是 tag 指向的那个 commit 里的 workflow 文件**：改了 workflow 本身之后，旧 tag 需要重新指向新 commit 再推送才会用新逻辑。
+- Windows runner 默认 shell 是 pwsh，`Remove-Item`、`Compress-Archive`、`||` 都直接可用；`gh` CLI 预装好了。
 
 ### 如何发布一个新版本
 
