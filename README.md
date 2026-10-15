@@ -22,6 +22,8 @@ Settings persist to `~/.config/auto_locker_screen_ex/config.json`.
 - Build via `build.ps1`, test via `test.ps1`. Both prompt for Debug/Release in the
   console (or take `-Configuration Debug|Release`). Do not invoke `dotnet build`
   directly for this folder.
-- Deploy via `build.ps1 -Deploy [-DeployDir <path>]`: builds Release and copies the
-  app files to the target dir (default `D:\auto_locker_screen_ex`), offering to kill
-  a running instance there first and to start it after copying.
+- Deploy via `build.ps1 -Deploy [-DeployDir <path>]`, or just answer the console
+  prompts: without `-Deploy` it asks deploy y/n (Enter = no) and the target dir
+  (Enter = default `D:\auto_locker_screen_ex`). Deploy builds Release, copies the
+  app files over, offering to kill a running instance there first and to start it
+  after copying.

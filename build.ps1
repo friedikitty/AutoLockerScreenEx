@@ -1,13 +1,28 @@
 # build.ps1 [-Configuration Debug|Release] [-Deploy [-DeployDir <path>]]
-# Builds the solution. Without -Configuration, asks via a console menu.
-# -Deploy always builds Release and copies the app files to -DeployDir
-# (default D:\auto_locker_screen_ex): offers to kill a running instance there
-# first, and to start it after copying.
+# Builds the solution; asks via console menus for anything not passed:
+# deploy y/n (Enter = no), deploy dir (Enter = default D:\auto_locker_screen_ex),
+# Debug/Release.
+# Deploy always builds Release and copies the app files to DeployDir: offers to
+# kill a running instance there first, and to start it after copying.
 param(
     [string]$Configuration = '',
     [switch]$Deploy,
     [string]$DeployDir = 'D:\auto_locker_screen_ex'
 )
+
+if (-not $Deploy) {
+    if ($PSBoundParameters.ContainsKey('DeployDir')) {
+        $Deploy = $true # -DeployDir alone implies deploy
+    }
+    else {
+        $choices = [System.Management.Automation.Host.ChoiceDescription[]]@('&No', '&Yes')
+        if ($Host.UI.PromptForChoice('Build', 'Deploy after build?', $choices, 0) -eq 1) {
+            $Deploy = $true
+            $dir = Read-Host "Deploy dir (Enter = $DeployDir)"
+            if ($dir) { $DeployDir = $dir }
+        }
+    }
+}
 
 if ($Deploy) {
     if ($Configuration -eq 'Debug') { Write-Host 'Deploy always builds Release.' }
