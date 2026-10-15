@@ -32,6 +32,28 @@ public class MainViewModel : INotifyPropertyChanged
 
     public uint MonitorIntervalSeconds => _config.MonitorIntervalSeconds;
 
+    public bool AutoResetEnabled
+    {
+        get => _config.AutoResetEnabled;
+        set { _config.AutoResetEnabled = value; Changed(); }
+    }
+
+    /// <summary>Auto-reset textbox text; only persisted when it's a valid positive integer.</summary>
+    public string AutoResetSecondsText
+    {
+        get => _config.AutoResetSeconds.ToString();
+        set
+        {
+            if (uint.TryParse(value, out uint n) && n > 0)
+            {
+                _config.AutoResetSeconds = n;
+            }
+            Changed();
+        }
+    }
+
+    public uint AutoResetSeconds => _config.AutoResetSeconds;
+
     private void Changed([CallerMemberName] string? name = null)
     {
         _config.Save();

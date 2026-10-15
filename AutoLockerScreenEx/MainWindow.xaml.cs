@@ -49,6 +49,12 @@ public partial class MainWindow : Window
         try
         {
             var (ac, dc) = ScreenOffTimeout.Get();
+            if (_vm.AutoResetEnabled)
+            {
+                uint reset = _vm.AutoResetSeconds;
+                if (ac == 0) { ScreenOffTimeout.SetScreenOffTimeoutAC(reset); ac = reset; }
+                if (dc == 0) { ScreenOffTimeout.SetScreenOffTimeoutDC(reset); dc = reset; }
+            }
             if (ac <= 1 || dc <= 1)
             {
                 ShowWarning($"Screen-off timeout is AC={ac}s, DC={dc}s (0 = never). Set a real value!");

@@ -11,6 +11,8 @@ public class Config
 {
     public bool MonitorEnabled { get; set; } = true;
     public uint MonitorIntervalSeconds { get; set; } = 60;
+    public bool AutoResetEnabled { get; set; }
+    public uint AutoResetSeconds { get; set; } = 300;
 
     public static readonly string FilePath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
